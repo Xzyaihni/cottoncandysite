@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>cotton candy site!</title>
+    <script src="main.js" defer></script>
+    <style>
+      html
+      {
+        background: #440a2e;
+      }
+
+      input[type="color"]
+      {
+        border: none;
+        background: none;
+        width: 45px;
+        height: 45px;
+      }
+
+      .color_text
+      {
+        vertical-align: top;
+        font-size: 30px;
+
+        color: #ffffff;
+      }
+
+      .labeled_color
+      {
+        width: 50%;
+        border: 3px solid #ffc4d5;
+        background-color: #ffc4d5;
+
+        margin-bottom: 13px;
+      }
+
+      .centered
+      {
+        display: flex;
+
+        width: 100%;
+        justify-content: center;
+      }
+
+      #main_grid
+      {
+        display: grid;
+
+        grid-template-columns: 33% 33% 33%;
+      }
+
+      #left_cell
+      {
+        grid-column: 1;
+      }
+
+      #clouds_canvas
+      {
+        grid-column: 2;
+      }
+
+      #clouds_canvas
+      {
+        margin: 5px;
+        border: 5px solid #ffc4d5;
+      }
+
+      .desc_text
+      {
+        color: #ffffff;
+        font-size: 25px;
+
+        -webkit-text-stroke: 1px #ffc4d5;
+      }
+
+      #song_text
+      {
+        margin-right: 5px;
+
+        display: inline;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="centered" id="main_grid">
+      <div id="left_cell">
+        <div class="labeled_color">
+          <input id="cloud_color" type="color" value="#ffffff">
+          <label class="color_text">cloud color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="star_color" type="color" value="#ffffff">
+          <label class="color_text">stars color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="sky_bottom_color" type="color" value="#ff1a33">
+          <label class="color_text">sky bottom color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="sky_top_color" type="color" value="#ff99d9">
+          <label class="color_text">sky top color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="wave_top_color" type="color" value="#ffffff">
+          <label class="color_text">water top color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="water_color" type="color" value="#cfb3ff">
+          <label class="color_text">water bottom color</label>
+        </div>
+        <div class="labeled_color">
+          <input id="water_refraction_color" type="color" value="#ffffff">
+          <label class="color_text">water light color</label>
+        </div>
+      </div>
+      <canvas id="clouds_canvas" width="640" height="640">
+        sowy couldnt display canvas, something wrong ; -;
+      </canvas>
+    </div>
+    <div class="centered">
+      <p class="desc_text" id="sugar_text">loading,,,</p>
+    </div>
+  </body>
+</html>
