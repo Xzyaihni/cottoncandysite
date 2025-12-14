@@ -1,11 +1,11 @@
 precision mediump float;
 
-const ivec2 CANVAS_DIMENSIONS = ivec2(640, 640);
-
 const ivec2 NOISES_DIMENSIONS = ivec2(7, 3);
 const int NOISES_AMOUNT = NOISES_DIMENSIONS.x * NOISES_DIMENSIONS.y;
 
 const int BLOBS_AMOUNT = 32; //COPY TO JS
+
+uniform vec2 canvas_dimensions;
 
 uniform vec2 blobs_pos[BLOBS_AMOUNT];
 uniform float blobs_size[BLOBS_AMOUNT];
@@ -118,7 +118,7 @@ vec4 pixel_at(vec2 pixel)
     float cloud_dist = 0.0;
     for(int i = 0; i < BLOBS_AMOUNT; ++i)
     {
-        float dist = distance(pixel, blobs_pos[i]) * 640.0;
+        float dist = distance(pixel, blobs_pos[i]) * canvas_dimensions.x;
 
         cloud_dist += max(log(min(blobs_size[i] / dist, 1.0)) + 1.0, 0.0);
     }
@@ -156,7 +156,7 @@ vec4 pixel_at(vec2 pixel)
 
 void main()
 {
-    vec2 pixel = gl_FragCoord.xy / vec2(CANVAS_DIMENSIONS);
+    vec2 pixel = gl_FragCoord.xy / canvas_dimensions;
 
     vec4 color = pixel_at(pixel);
 

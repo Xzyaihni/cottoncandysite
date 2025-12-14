@@ -6,12 +6,12 @@ void main()
 }`;
 const f_shader = `precision mediump float;
 
-const ivec2 CANVAS_DIMENSIONS = ivec2(640, 640);
-
 const ivec2 NOISES_DIMENSIONS = ivec2(7, 3);
 const int NOISES_AMOUNT = NOISES_DIMENSIONS.x * NOISES_DIMENSIONS.y;
 
 const int BLOBS_AMOUNT = 32; //COPY TO JS
+
+uniform vec2 canvas_dimensions;
 
 uniform vec2 blobs_pos[BLOBS_AMOUNT];
 uniform float blobs_size[BLOBS_AMOUNT];
@@ -124,7 +124,7 @@ vec4 pixel_at(vec2 pixel)
     float cloud_dist = 0.0;
     for(int i = 0; i < BLOBS_AMOUNT; ++i)
     {
-        float dist = distance(pixel, blobs_pos[i]) * 640.0;
+        float dist = distance(pixel, blobs_pos[i]) * canvas_dimensions.x;
 
         cloud_dist += max(log(min(blobs_size[i] / dist, 1.0)) + 1.0, 0.0);
     }
@@ -162,7 +162,7 @@ vec4 pixel_at(vec2 pixel)
 
 void main()
 {
-    vec2 pixel = gl_FragCoord.xy / vec2(CANVAS_DIMENSIONS);
+    vec2 pixel = gl_FragCoord.xy / canvas_dimensions;
 
     vec4 color = pixel_at(pixel);
 
@@ -218,8 +218,8 @@ void main()
 }`;
 const BLOBS_AMOUNT = 32; //COPY TO JS
 const STARS_AMOUNT = 16; //COPY TO JS
-const canvas = document.getElementById("clouds_canvas");
-const gl = canvas.getContext("webgl");
+let canvas = document.getElementById("clouds_canvas");
+let gl = canvas.getContext("webgl2");
 
 const sugar_text = document.getElementById("sugar_text");
 
@@ -286,6 +286,49 @@ canvas.addEventListener("mouseout", end_attract);
 canvas.addEventListener("mousemove", attract);
 
 document.addEventListener("DOMContentLoaded", main);
+
+const resizer = new ResizeObserver(on_resize_observer);
+resizer.observe(canvas, {box: "content-box"});
+
+function on_resize_observer(events)
+{
+    for (const event of events)
+    {
+        if (!event.devicePixelContentBoxSize)
+        {
+            return;
+        }
+
+        const box = event.devicePixelContentBoxSize[0];
+
+        resize_canvas_correct(box.inlineSize, box.blockSize);
+    }
+}
+
+function resize_canvas_correct(new_width, new_height)
+{
+    if (canvas.width !== new_width || canvas.height !== new_height)
+    {
+        canvas.width = new_width;
+        canvas.height = new_height;
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        main();
+    }
+}
+
+function canvas_dependent()
+{
+    if (program_info === null)
+    {
+        return;
+    }
+
+    const dpr = window.devicePixelRatio;
+    gl.uniform2f(program_info.uniform_locations.canvas_dimensions, canvas.width * dpr, canvas.height * dpr);
+}
+
 function main()
 {
     if (gl === null)
@@ -408,7 +451,7 @@ function update_blobs(dt)
 {
     for(let i = 0; i < BLOBS_AMOUNT; ++i)
     {
-        const margin = blobs_size[i] * 2.6 / 640;
+        const margin = blobs_size[i] * 2.6 / canvas.width;
 
         const mass = blobs_size[i] * blobs_size[i];
 
@@ -426,8 +469,8 @@ function update_blobs(dt)
 
         if (mouse_down)
         {
-            const x_diff = (blobs_pos[i*2] - mouse.x) * 640;
-            const y_diff = (blobs_pos[i*2+1] - mouse.y) * 640;
+            const x_diff = (blobs_pos[i*2] - mouse.x) * canvas.width;
+            const y_diff = (blobs_pos[i*2+1] - mouse.y) * canvas.height;
 
             const square_dist = x_diff * x_diff + y_diff * y_diff;
 
@@ -450,7 +493,7 @@ function update_blobs(dt)
 
         const wave_level = 0.3;
 
-        const bottom_height = blobs_pos[i*2+1] - blobs_size[i] / 640;
+        const bottom_height = blobs_pos[i*2+1] - blobs_size[i] / canvas.height;
         if (bottom_height < wave_level)
         {
             const previous_size = blobs_size[i];
@@ -475,7 +518,7 @@ function update_stars(dt)
 
         const star_u_dist = Math.sqrt(star_x_diff * star_x_diff + star_y_diff * star_y_diff);
 
-        const star_dist = Math.max(star_u_dist * 640, 1.0);
+        const star_dist = Math.max(star_u_dist * canvas.width, 1.0);
 
         stars_x_velocity[i] += (Math.random()-0.5) * stars_speed / star_dist;
         stars_y_velocity[i] += (Math.random()-0.5) * stars_speed / star_dist;
@@ -490,6 +533,22 @@ function update_stars(dt)
 
 function create_objects()
 {
+    blobs_pos = [];
+
+    blobs_max_size = [];
+    blobs_size = [];
+
+    blobs_x_velocity = [];
+    blobs_y_velocity = [];
+
+    stars_pos = [];
+
+    stars_x_original = [];
+    stars_y_original = [];
+
+    stars_x_velocity = [];
+    stars_y_velocity = [];
+
     for(let i = 0; i < BLOBS_AMOUNT; ++i)
     {
         const x = Math.sqrt(Math.random())*1.3 - 0.3;
@@ -554,9 +613,10 @@ function initialize_clouds()
         return;
     }
 
+    gl.useProgram(program_info.program);
+
     const buffer = init_default_buffer(program_info);
 
-    gl.useProgram(program_info.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
     //default but still
@@ -566,6 +626,8 @@ function initialize_clouds()
     update_blob_size();
 
     setup_colors();
+
+    canvas_dependent();
 
     requestAnimationFrame(proccess_frame);
 }
@@ -613,6 +675,7 @@ function attributes_info()
         },
         uniform_locations:
         {
+            canvas_dimensions: get_uniform("canvas_dimensions"),
             blobs_pos: get_uniform("blobs_pos"),
             blobs_size: get_uniform("blobs_size"),
             stars_pos: get_uniform("stars_pos"),
