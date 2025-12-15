@@ -325,8 +325,7 @@ function canvas_dependent()
         return;
     }
 
-    const dpr = window.devicePixelRatio;
-    gl.uniform2f(program_info.uniform_locations.canvas_dimensions, canvas.width * dpr, canvas.height * dpr);
+    gl.uniform2f(program_info.uniform_locations.canvas_dimensions, canvas.width, canvas.height);
 }
 
 function main()
@@ -557,7 +556,7 @@ function create_objects()
         blobs_pos.push(x);
         blobs_pos.push(y);
 
-        const size = Math.max(Math.random() * 50, 15);
+        const size = Math.max(Math.random() * 50, 15) / (640.0 / canvas.width);
         blobs_size.push(size);
         blobs_max_size.push(size);
 
