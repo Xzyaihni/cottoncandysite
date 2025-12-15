@@ -219,7 +219,7 @@ void main()
 const BLOBS_AMOUNT = 32; //COPY TO JS
 const STARS_AMOUNT = 16; //COPY TO JS
 let canvas = document.getElementById("clouds_canvas");
-let gl = canvas.getContext("webgl2");
+let gl = canvas.getContext("webgl");
 
 const sugar_text = document.getElementById("sugar_text");
 

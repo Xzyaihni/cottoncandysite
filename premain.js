@@ -1,5 +1,5 @@
 let canvas = document.getElementById("clouds_canvas");
-let gl = canvas.getContext("webgl2");
+let gl = canvas.getContext("webgl");
 
 const sugar_text = document.getElementById("sugar_text");
 
